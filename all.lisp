@@ -200,13 +200,14 @@ compile time."
         (let* ((py-key (pythonic key))
                (py-name (concat name "." py-key)))
           (with-py-lock
-            (w/ptr (p (run* py-name))
-              (if (callable.check p)
-                  (lambda (&rest args)
-                    (with-module (self)
-                      (with-py-lock
-                        (apply #'pycall py-name args))))
-                  (cffi:convert-from-foreign p 'cpython::object!))))))))
+            (with-module (self)
+              (w/ptr (p (run* py-name))
+                (if (callable.check p)
+                    (lambda (&rest args)
+                      (with-module (self)
+                        (with-py-lock
+                          (apply #'pycall py-name args))))
+                    (cffi:convert-from-foreign p 'cpython::object!)))))))))
   
   (:method module-exports (self)
     ;; "The public names defined by a module are determined by checking
