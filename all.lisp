@@ -1,8 +1,8 @@
 (defpackage #:bosom-serpent/all
   (:use #:cl #:alexandria #:serapeum)
   (:nicknames #:bosom-serpent)
-  (:import-from #:loom
-    #:deflang/loader #:module-exports #:module-ref)
+  (:import-from #:overlord
+    #:define-loader-language #:module-exports #:module-ref)
   (:import-from #:burgled-batteries
     #:run #:run* #:startup-python #:defpyfun)
   (:import-from #:python.cffi
@@ -21,7 +21,6 @@
     #:scan)
   (:shadowing-import-from #:burgled-batteries
     #:import)
-  (:export #:python2)
   (:documentation
    #.(alexandria:read-file-into-string (asdf:system-relative-pathname :bosom-serpent "README.markdown"))))
 (in-package #:bosom-serpent/all)
@@ -68,7 +67,7 @@ loaded (by listening for the correct NameError)."
 
 ;;; The language.
 
-(deflang/loader python2 (source)
+(define-loader-language bosom-serpent/python2 (source)
   (with-py-lock
     (ensure-python)
     (make 'python-module :source source))
