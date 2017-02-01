@@ -5,11 +5,11 @@
 > the world. A snake in the bosom – that’s all,” answered Roderick
 > Elliston.
 
-— Nathaniel Hawthorne, [The Bosom Serpent][hawthorne].
+— Nathaniel Hawthorne, [The Bosom Serpent][TBS].
 
 Bosom Serpent is a library for using Python modules from Lisp. It is a
 thin layer over [burgled-batteries][] and allows Python modules to
-be imported as Overlord modules.
+be imported as [Overlord][] modules.
 
 Bosom Serpent does not allow you to import Python modules directly.
 Instead, the trick is to add a Python file as part of your Lisp system
@@ -61,6 +61,6 @@ Having a shim gives you a place to translate Python classes into
 simpler, portable data structures, without losing the efficiency of
 embedding over calling out to a separate Python process.
 
-[hawthorne]: http://www.online-literature.com/hawthorne/132/
+[TBS]: http://www.online-literature.com/hawthorne/132/
 [burgled-batteries]: https://github.com/pinterface/burgled-batteries
 [Overlord]: https://github.com/TBRSS/Overlord
