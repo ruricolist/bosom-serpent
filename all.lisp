@@ -19,6 +19,8 @@
     #:make-lock #:with-lock-held)
   (:shadowing-import-from #:cl-ppcre
     #:scan)
+  (:import-from #:trivia #:match)
+  (:import-from #:trivia.ppcre #:ppcre)
   (:shadowing-import-from #:burgled-batteries
     #:import))
 (in-package #:bosom-serpent/all)
@@ -91,6 +93,11 @@ need."
 
 ;;; Lazy-load modules.
 
+;;; XXX There doesn't actually seem to be a better way to do this.
+(defun name-error-name (name-error)
+  (match (princ-to-string name-error)
+    ((ppcre "^name '(\\w+)' is not defined$" name) name)))
+
 (defun call/module (module thunk)
   "Call THUNK, ensuring that MODULE is loaded by handling NameError
 exceptions."
@@ -98,11 +105,10 @@ exceptions."
   (tagbody :retry
      (handler-bind ((name-error
                       (lambda (e)
-                        (with-slots (name source) module
-                          (when (equal (princ-to-string e)
-                                       (fmt "name '~a' is not defined" name))
+                        (with-slots ((module-name name) source) module
+                          (when (equal (name-error-name e) module-name)
                             (progn
-                              (ensure-module name source)
+                              (ensure-module module-name source)
                               (go :retry)))))))
        (return-from call/module
          (funcall thunk)))))
