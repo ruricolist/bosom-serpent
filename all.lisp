@@ -188,7 +188,7 @@ compile time."
   (:method initialize-instance :after (self &key)
     (setf name (uniquify-module source))
 
-    (let ((name name))
+    (let ((name name))                  ;Don't close over slot-value.
       (finalize self
                 (lambda ()
                   (ignore-errors
