@@ -181,10 +181,13 @@ compile time."
     :documentation "The pathname to load the module from.")
    (cache
     :initform (make-hash-table)
-    :documentation "A cache for closed-over Python methods."))
+    :documentation "A cache for closed-over Python methods.")
+   (lock
+    :initform (make-lock)
+    :documentation "Lock for the module itself."))
   (:documentation "Wrapper for a Python module."))
 
-(defmethods python-module (self name source cache)
+(defmethods python-module (self name source cache lock)
   (:method initialize-instance :after (self &key)
     (setf name (uniquify-module source))
 
@@ -203,7 +206,7 @@ compile time."
     (ensure-python)
     ;; The cache is to ensure that closures are not needlessly
     ;; allocated when importing bindings instead of values.
-    (synchronized (cache)
+    (with-lock-held (lock)
       (ensure2 (gethash key cache)
         (let* ((py-key (pythonic key))
                (py-name (concat name "." py-key)))
