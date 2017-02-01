@@ -18,26 +18,23 @@ interested in. It is assumed that this file will also do the work of
 wrapping the output of Python functions in a form that Lisp will
 understand.
 
-Say you want to use the hypothetical Python module `antigravity` from
-Lisp. You create a Python file in your Lisp project named
-`antigravity_stub.py`:
+Say you want to use the Python module `shlex` from Lisp. You create a
+Python file in your Lisp project. The name of the file doesn’t matter.
 
-     import antigravity
+    # shlex_stub.py
+    import shlex
 
-     def fly():
-         antigravity.fly()
+    def lex(s):
+        return shlex.split(s)
 
-     def levitate(object):
-         antigravity.levitate(object)
+You can then import this Python module into Lisp from your project:
 
-You can then import this Python module into Lisp:
-
-     (overlord:import antigravity
+     (overlord:import shlex
        :as :bosom-serpent/python2
-       :from \"antigravity_stub\"
-       :binding (#'fly #'levitate))
+       :from "shlex_stub"
+       :binding (#'lex))
 
-     (fly) => \"I think this is the Python.\"
+     (lex "how now 'brown cow’") -> #("how" "now" "brown cow")
 
 Limitations: same as the limitations for any Python embedding. There
 is only one running Python interpreter at a time, and access to the
