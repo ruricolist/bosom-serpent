@@ -34,7 +34,7 @@ You can then import this Python module into Lisp from your project:
        :from "shlex_stub"
        :binding (#'lex))
 
-     (lex "how now 'brown cow’") -> #("how" "now" "brown cow")
+     (lex "how now 'brown cow'") -> #("how" "now" "brown cow")
 
 Limitations: same as the limitations for any Python embedding. There
 is only one running Python interpreter at a time, and access to the
