@@ -20,9 +20,7 @@
   (:shadowing-import-from #:cl-ppcre
     #:scan)
   (:shadowing-import-from #:burgled-batteries
-    #:import)
-  (:documentation
-   #.(alexandria:read-file-into-string (asdf:system-relative-pathname :bosom-serpent "README.markdown"))))
+    #:import))
 (in-package #:bosom-serpent/all)
 
 ;;; NB If you initialize Python in a Lisp image, save the Lisp image,
