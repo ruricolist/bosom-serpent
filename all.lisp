@@ -159,9 +159,10 @@ decrementing the pointer's ref count once done."
 
 (defun pycall (fn &rest args)
   "Call FN, a Python function, with ARGS."
-  (with-py-lock
-    (w/ptr (p (run* (pythonic fn)))
-      (object.call-object p args))))
+  (let ((fn (pythonic fn)))
+    (with-py-lock
+      (w/ptr (p (run* fn))
+        (object.call-object p args)))))
 
 (define-compiler-macro pycall (&whole call fn &rest args)
   "Try to convert function names from Lispy to Pythonic form at
