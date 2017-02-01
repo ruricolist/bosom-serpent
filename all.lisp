@@ -31,6 +31,7 @@
 
 (defvar *module-counter* 0
   "Counter to ensure that Python module names are globally unique.")
+(declaim (type (integer 0 *) *module-counter*))
 
 (defun uniquify-module (source)
   "Generate a globally unique module name for SOURCE.
