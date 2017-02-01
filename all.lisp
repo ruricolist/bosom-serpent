@@ -173,12 +173,15 @@ compile time."
         (t call)))
 
 (defclass python-module ()
-  ((name :type string
-         :documentation "The unique name for the Python module.")
-   (source :initarg :source :type pathname
-           :documentation "The pathname to load the module from.")
-   (cache :initform (make-hash-table)
-          :documentation "A cache for closed-over Python methods."))
+  ((name
+    :type string
+    :documentation "The unique name for the Python module.")
+   (source
+    :initarg :source :type pathname
+    :documentation "The pathname to load the module from.")
+   (cache
+    :initform (make-hash-table)
+    :documentation "A cache for closed-over Python methods."))
   (:documentation "Wrapper for a Python module."))
 
 (defmethods python-module (self name source cache)
