@@ -1,7 +1,7 @@
 ;;;; bosom-serpent.asd
 
 (asdf:defsystem #:bosom-serpent
-  :description "Describe bosom-serpent here"
+  :description "Import Python modules as Overlord modules"
   :author "Paul M. Rodriguez <pmr@ruricolist.com>"
   :license "MIT"
   :defsystem-depends-on (:asdf-package-system)
