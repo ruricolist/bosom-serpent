@@ -8,9 +8,6 @@
   :class :package-inferred-system
   :depends-on (#:bosom-serpent/all))
 
-(register-system-packages
+(asdf:register-system-packages
  "burgled-batteries"
  '(:burgled-batteries :python.cffi))
-(register-system-packages
- "trivia/ppcre"
- '(:trivia.ppcre))
