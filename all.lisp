@@ -85,6 +85,27 @@ need."
     (assert (.is-initialized))
     (py "import sys, imp, code")))
 
+(defsubst underscore? (char)
+  (char= char #\_))
+
+(defalias valid-first-char?
+  (disjoin #'underscore? #'alpha-char-p))
+
+(defalias valid-rest-char?
+  (disjoin #'underscore? #'alpha-char-p #'digit-char-p))
+
+(defun valid-python-var? (name)
+  (check-type name string)
+  (and (> (length name) 0)
+       (and (valid-first-char? (aref name 0))
+            (loop for i from 1 below (length name)
+                  always (valid-rest-char? (aref name i))))))
+
+(defun check-module-name (name)
+  (unless (valid-python-var? name)
+    (error "~s cannot be used as the name for a Python module."
+           name)))
+
 (defun ensure-module (name source)
   (ensure-python)
   (unless (py "~s in sys.modules" name)
@@ -190,6 +211,7 @@ compile time."
 (defmethods python-module (self name source cache lock)
   (:method initialize-instance :after (self &key)
     (setf name (uniquify-module source))
+    (check-module-name name)
 
     (let ((name name))                  ;Don't close over slot-value.
       (finalize self
