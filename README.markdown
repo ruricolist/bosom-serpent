@@ -31,7 +31,7 @@ You can then import this Python module into Lisp from your project:
 
      (overlord:import shlex
        :as :bosom-serpent/python2
-       :from "shlex_stub"
+       :from "shlex_stub.py"
        :binding (#'lex))
 
      (lex "how now 'brown cow'") -> #("how" "now" "brown cow")
