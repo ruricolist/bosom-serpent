@@ -1,8 +1,8 @@
 (defpackage #:bosom-serpent/all
   (:use #:cl #:alexandria #:serapeum)
   (:nicknames #:bosom-serpent)
-  (:import-from #:overlord
-    #:define-loader-language #:module-exports #:module-ref)
+  (:import-from #:vernacular
+    #:module-exports #:module-ref)
   (:import-from #:burgled-batteries
     #:run #:run* #:startup-python #:defpyfun)
   (:import-from #:python.cffi
@@ -16,7 +16,7 @@
   (:import-from #:trivial-garbage
     #:finalize)
   (:import-from #:bordeaux-threads
-    #:make-lock #:with-lock-held)
+    #:make-recursive-lock #:with-recursive-lock-held)
   (:shadowing-import-from #:cl-ppcre
     #:scan)
   (:import-from #:trivia #:match)
@@ -47,11 +47,11 @@ loaded (by listening for the correct NameError)."
 
 ;;; Locking.
 
-(def py-lock (make-lock)
+(def py-lock (make-recursive-lock)
   "Lock for all access to Python.")
 
 (defmacro with-py-lock (&body body)
-  `(with-lock-held (py-lock)
+  `(with-recursive-lock-held (py-lock)
      ,@body))
 
 ;;; Executing Python strings.
@@ -68,11 +68,21 @@ loaded (by listening for the correct NameError)."
 
 ;;; The language.
 
-(define-loader-language bosom-serpent/python2 (source)
-  (with-py-lock
-    (ensure-python)
-    (make 'python-module :source source))
-  :extension "py")
+(defpackage :bosom-serpent/python2
+  (:use)
+  (:export :read-module :module-progn :extension))
+
+(defparameter bosom-serpent/python2:extension
+  (overlord:extension "py"))
+
+(defun bosom-serpent/python2:read-module (source stream)
+  (declare (ignore stream))
+  `(bosom-serpent/python2:module-progn ,source))
+
+(defmacro bosom-serpent/python2:module-progn (&body (source))
+  `(with-py-lock
+       (ensure-python)
+     (make 'python-module :source ,source)))
 
 ;;; Ensuring things are loaded.
 
@@ -233,14 +243,14 @@ compile time."
         (let* ((py-key (pythonic key))
                (py-name (concat name "." py-key)))
           (with-py-lock
-            (with-module (self)
-              (w/ptr (p (run* py-name))
-                (if (callable.check p)
-                    (lambda (&rest args)
-                      (with-module (self)
-                        (with-py-lock
-                          (apply #'pycall py-name args))))
-                    (cffi:convert-from-foreign p 'cpython::object!)))))))))
+              (with-module (self)
+                (w/ptr (p (run* py-name))
+                       (if (callable.check p)
+                           (lambda (&rest args)
+                             (with-module (self)
+                               (with-py-lock
+                                   (apply #'pycall py-name args))))
+                           (cffi:convert-from-foreign p 'cpython::object!)))))))))
   
   (:method module-exports (self)
     ;; "The public names defined by a module are determined by checking
@@ -253,11 +263,11 @@ compile time."
     ;; character ('_')."
     (with-module (self)
       (with-py-lock
-        (handler-case
-            ;; Check for __all__.
-            (map 'list #'lispy (py "~a.__all__" name))
-          (attribute-error ()
-            ;; Any member name that don't start with _.
-            (loop for name across (py "dir(~a)" name)
-                  unless (string^= "_" name)
-                    collect (lispy name))))))))
+          (handler-case
+              ;; Check for __all__.
+              (map 'list #'lispy (py "~a.__all__" name))
+            (attribute-error ()
+              ;; Any member name that don't start with _.
+              (loop for name across (py "dir(~a)" name)
+                    unless (string^= "_" name)
+                      collect (lispy name))))))))

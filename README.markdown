@@ -9,7 +9,7 @@
 
 Bosom Serpent is a library for using Python modules from Lisp. It is a
 thin layer over [burgled-batteries][] and allows Python modules to
-be imported as [Overlord][] modules.
+be imported as [Vernacular][] modules.
 
 Bosom Serpent does not allow you to import Python modules directly.
 Instead, the trick is to add a Python file as part of your Lisp system
@@ -29,7 +29,7 @@ Python file in your Lisp project. The name of the file doesn’t matter.
 
 You can then import this Python module into Lisp from your project:
 
-     (overlord:import shlex
+     (vernacular:import shlex
        :as :bosom-serpent/python2
        :from "shlex_stub.py"
        :binding (#'lex))
@@ -43,7 +43,7 @@ interpreter is strictly single-threaded.
 # Postscript
 
 I wrote Bosom Serpent as a simple demonstration of how to wrap an
-embedded runtime for use with Overlord, but it has proven to be
+embedded runtime for use with Vernacular, but it has proven to be
 unexpectedly useful. In particular, the fact that a shim is required
 to use a Python module, which might seem onerous at first, is what
 makes it work so well.
@@ -60,4 +60,5 @@ embedding over calling out to a separate Python process.
 
 [TBS]: http://www.online-literature.com/hawthorne/132/
 [burgled-batteries]: https://github.com/pinterface/burgled-batteries
-[Overlord]: https://github.com/TBRSS/Overlord
+[Overlord]: https://github.com/ruricolist/overlord
+[Vernacular]: https://github.com/ruricolist/vernacular

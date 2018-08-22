@@ -1,13 +1,15 @@
 ;;;; bosom-serpent.asd
 
-(asdf:defsystem #:bosom-serpent
-  :description "Import Python modules as Overlord modules"
+(defsystem "bosom-serpent"
+  :description "Import Python modules as Vernacular modules"
   :author "Paul M. Rodriguez <pmr@ruricolist.com>"
   :license "MIT"
   :defsystem-depends-on (:asdf-package-system)
   :class :package-inferred-system
-  :depends-on (#:bosom-serpent/all))
+  :depends-on ("bosom-serpent/all")
+  :in-order-to ((test-op (test-op "bosom-serpent/test")))
+  :perform (test-op (o c) (symbol-call :bosom-serpent/test :run-tests)))
 
-(asdf:register-system-packages
+(register-system-packages
  "burgled-batteries"
  '(:burgled-batteries :python.cffi))
