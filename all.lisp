@@ -214,7 +214,7 @@ compile time."
     :initform (make-hash-table)
     :documentation "A cache for closed-over Python methods.")
    (lock
-    :initform (make-lock)
+    :initform (make-recursive-lock)
     :documentation "Lock for the module itself."))
   (:documentation "Wrapper for a Python module."))
 
@@ -238,19 +238,19 @@ compile time."
     (ensure-python)
     ;; The cache is to ensure that closures are not needlessly
     ;; allocated when importing bindings instead of values.
-    (with-lock-held (lock)
+    (with-recursive-lock-held (lock)
       (ensure2 (gethash key cache)
         (let* ((py-key (pythonic key))
                (py-name (concat name "." py-key)))
           (with-py-lock
-              (with-module (self)
-                (w/ptr (p (run* py-name))
-                       (if (callable.check p)
-                           (lambda (&rest args)
-                             (with-module (self)
-                               (with-py-lock
-                                   (apply #'pycall py-name args))))
-                           (cffi:convert-from-foreign p 'cpython::object!)))))))))
+            (with-module (self)
+              (w/ptr (p (run* py-name))
+                (if (callable.check p)
+                    (lambda (&rest args)
+                      (with-module (self)
+                        (with-py-lock
+                          (apply #'pycall py-name args))))
+                    (cffi:convert-from-foreign p 'cpython::object!)))))))))
   
   (:method module-exports (self)
     ;; "The public names defined by a module are determined by checking
@@ -263,11 +263,11 @@ compile time."
     ;; character ('_')."
     (with-module (self)
       (with-py-lock
-          (handler-case
-              ;; Check for __all__.
-              (map 'list #'lispy (py "~a.__all__" name))
-            (attribute-error ()
-              ;; Any member name that don't start with _.
-              (loop for name across (py "dir(~a)" name)
-                    unless (string^= "_" name)
-                      collect (lispy name))))))))
+        (handler-case
+            ;; Check for __all__.
+            (map 'list #'lispy (py "~a.__all__" name))
+          (attribute-error ()
+            ;; Any member name that don't start with _.
+            (loop for name across (py "dir(~a)" name)
+                  unless (string^= "_" name)
+                    collect (lispy name))))))))
