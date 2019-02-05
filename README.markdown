@@ -4,15 +4,15 @@
 
 — Nathaniel Hawthorne, [The Bosom Serpent][TBS].
 
-Bosom Serpent is a library for using Python modules from Lisp. It is a
-thin layer over [burgled-batteries][] and allows Python modules to
-be imported as [Vernacular][] modules.
+Bosom Serpent is a library for using Python from Lisp. It is a thin
+layer over [burgled-batteries][] and allows [Vernacular][] modules to
+be written in Python.
 
-Bosom Serpent does not import Python modules directly into Lisp. The
-trick is to add a Python file as part of your Lisp system and load it
-as a module which re-exports the functionality you're interested in.
-This file will also do the work of wrapping the output of Python
-functions in a form that Lisp will understand.
+Bosom Serpent does not import arbitrary Python modules directly into
+Lisp. The trick is to add a Python file (which can use any Python
+module) as part of your Lisp system, and re-exports the functionality
+you're interested in. This file will also do the work of wrapping the
+output of Python functions in a form that Lisp will understand.
 
 Say you want to use the Python module `shlex` from Lisp. You create a
 Python file in your Lisp system. The name of the file doesn’t matter.
@@ -23,7 +23,8 @@ Python file in your Lisp system. The name of the file doesn’t matter.
     def lex(s):
         return shlex.split(s)
 
-You can then import this Python module into Lisp from your system:
+You can then import this Python module into Lisp from another file in
+the same system:
 
      (vernacular:import shlex
        :as :bosom-serpent/python2
