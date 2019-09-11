@@ -2,7 +2,7 @@
   (:use #:cl #:alexandria #:serapeum)
   (:nicknames #:bosom-serpent)
   (:import-from #:vernacular
-    #:module-exports #:module-ref)
+    #:module-exports #:module-ref #:module-ref-ns)
   (:import-from #:burgled-batteries
     #:run #:run* #:startup-python #:defpyfun)
   (:import-from #:python.cffi
@@ -236,9 +236,10 @@ compile time."
   (:method module-ref (self (key symbol))
     (check-type key keyword)
     (ensure-python)
-    ;; The cache is to ensure that closures are not needlessly
-    ;; allocated when importing bindings instead of values.
     (with-recursive-lock-held (lock)
+      ;; The cache is to ensure that closures are not needlessly
+      ;; reallocated with every import, and to avoid needless locking
+      ;; and allocation.
       (ensure2 (gethash key cache)
         (let* ((py-key (pythonic key))
                (py-name (concat name "." py-key)))
@@ -251,6 +252,9 @@ compile time."
                         (with-py-lock
                           (apply #'pycall py-name args))))
                     (cffi:convert-from-foreign p 'cpython::object!)))))))))
+
+  (:method module-ref-ns (self (key symbol) (ns (eql 'function)))
+    (assure function (call-next-method)))
   
   (:method module-exports (self)
     ;; "The public names defined by a module are determined by checking
@@ -261,13 +265,20 @@ compile time."
     ;; defined, the set of public names includes all names found in the
     ;; module’s namespace which do not begin with an underscore
     ;; character ('_')."
+    (flet ((callable? (binding)
+             (let ((py-name (concat name "." (pythonic binding))))
+               (w/ptr (p (run* py-name))
+                 (callable.check p))))))
     (with-module (self)
       (with-py-lock
         (handler-case
             ;; Check for __all__.
-            (map 'list #'lispy (py "~a.__all__" name))
+            (mvlet* ((all (py "~a.__all__" name))
+                     (fns vars (partition (op (callable? name _)) all)))
+              (nconc (map 'list #'lispy fns)
+                     (map 'list #'lispy vars)))
           (attribute-error ()
-            ;; Any member name that don't start with _.
+            ;; Any member name that doesn't start with _.
             (loop for name across (py "dir(~a)" name)
                   unless (string^= "_" name)
                     collect (lispy name))))))))
